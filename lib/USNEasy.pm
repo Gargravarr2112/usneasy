@@ -158,8 +158,7 @@ sub instructions{
     my $line = shift(@instructions);
     if($in_packages == 1){
         if($line=~m/^((Ubuntu)\s+([^:]*):*)/){
-          $distro = $3;
-          $distro=~s/ LTS$//;
+          $distro = "$2 $3";
         }elsif($line=~m/^  (\S+)\s+(\S+)/){
           push(@{ $packages->{$distro} }, {'package' => $1, 'version' => $2});
         }elsif($line=~/^\s*$/){
