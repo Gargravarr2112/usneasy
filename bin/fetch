@@ -1,42 +1,29 @@
 #!/bin/bash
-(
-  cd $(dirname $0); 
-  for yearmonth in 2004-October 2004-November 2004-December; do
-      if [ ! -f "../data/${yearmonth}.txt" ]; then
-        wget -O ../data/${yearmonth}.txt.gz https://lists.ubuntu.com/archives/ubuntu-security-announce/${yearmonth}.txt.gz
-        gunzip ../data/${yearmonth}.txt.gz
-      fi
-  done
-  for year in 2005 2006 2007 2008 2009 2010 2011 2012 2013 2014; do
-    for month in January February March April May June July August September October November December; do
-      if [ ! -f "../data/${year}-${month}.txt" ]; then
-        wget -O ../data/${year}-${month}.txt.gz https://lists.ubuntu.com/archives/ubuntu-security-announce/$year-$month.txt.gz
-        gunzip ../data/${year}-${month}.txt.gz
-      fi
-    done
-  done
-  for year in 2015; do
-    for month in January February March April May June July August September; do
-      if [ ! -f "../data/${year}-${month}.txt" ]; then
-        wget -O ../data/${year}-${month}.txt.gz https://lists.ubuntu.com/archives/ubuntu-security-announce/$year-$month.txt.gz || \
-          wget -O ../data/${year}-${month}.txt.gz https://lists.ubuntu.com/archives/ubuntu-security-announce/$year-$month.txt
-        gunzip ../data/${year}-${month}.txt.gz
-      fi
-    done
-  done
+set -eu;
 
-  for year in 2004 2005 2006 2007 2008 2009 2010 2011 2012 2013 2014 2015; do
-    if [ ! -f ../cve/allitems-cvrf-year-${year}.xml ] ; then
-      wget -O ../cve/allitems-cvrf-year-${year}.xml http://cve.mitre.org/data/downloads/allitems-cvrf-year-${year}.xml
+cd $(dirname $0);
+currentYear=$(date +'%Y');
+currentMonth=$(date +'%B');
+for year in $(seq -s ' ' 2011 $currentYear); do
+  for month in January February March April May June July August September October November December; do
+    if  [[ $year == $currentYear ]] && [[ $month == $currentMonth ]]; then
+      break;
+    fi
+    if [ ! -f "../data/${year}-${month}.txt" ]; then
+      wget -O ../data/${year}-${month}.txt.gz https://lists.ubuntu.com/archives/ubuntu-security-announce/$year-$month.txt.gz
+      gunzip ../data/${year}-${month}.txt.gz
     fi
   done
 
-  for year in 2004 2005 2006 2007 2008 2009 2010 2011 2012 2013 2014 2015; do
-    if [ ! -f ../nvd/nvdcve-2.0-${year}.xml ] ; then
-      wget -O ../nvd/nvdcve-2.0-${year}.xml.gz https://nvd.nist.gov/feeds/xml/cve/nvdcve-2.0-${year}.xml.gz
-      gunzip ../nvd/nvdcve-2.0-${year}.xml.gz
-    fi
-  done
+  if [ ! -f ../cve/allitems-cvrf-year-${year}.xml ] ; then
+    wget -O ../cve/allitems-cvrf-year-${year}.xml http://cve.mitre.org/data/downloads/allitems-cvrf-year-${year}.xml
+  fi
 
-  chmod 444 ../data/* ../cve/* ../nvd/*
-)
+  if [ ! -f ../nvd/nvdcve-2.0-${year}.xml ] ; then
+    wget -O ../nvd/nvdcve-2.0-${year}.xml.gz https://nvd.nist.gov/feeds/xml/cve/2.0/nvdcve-2.0-${year}.xml.gz
+    gunzip ../nvd/nvdcve-2.0-${year}.xml.gz
+  fi
+done
+
+chmod 444 ../data/* ../cve/* ../nvd/*
+
